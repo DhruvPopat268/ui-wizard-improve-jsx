@@ -171,7 +171,7 @@ const CabCostCalculator = () => {
         { key: 'nightCharges', label: 'Night Charges (₹)' },
         { key: 'cancellationFee', label: 'Cancellation Fee (₹)' },
         { key: 'insurance', label: 'Insurance (₹)' },
-        { key: 'extraCharges', label: 'Extra Other Charges (₹)' },
+        { key: 'extraCharges', label: 'Extra Other Charges from Admin (₹)' },
         { key: 'discount', label: 'Discount (₹)' },
       ]
     }
