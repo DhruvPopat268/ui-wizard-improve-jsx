@@ -1,10 +1,24 @@
-
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Calculator, Car, Clock, MapPin, CreditCard, Shield, Percent, Receipt } from 'lucide-react';
+import {
+  Calculator,
+  Car,
+  Clock,
+  MapPin,
+  CreditCard,
+  Shield,
+  Percent,
+  Receipt
+} from 'lucide-react';
 
 const CabCostCalculator = () => {
   const [data, setData] = useState({
@@ -36,19 +50,30 @@ const CabCostCalculator = () => {
   const remainingMinutes = Math.max(data.totalMinutes - data.includedMinutes, 0);
   const amountForMinutes = remainingMinutes * data.extraPerMin;
 
+  const additionalCharges =
+    data.pickCharges + data.nightCharges + data.cancellationFee + data.insurance;
+
   const subtotal =
+    data.baseFare + amountForKm + amountForMinutes + additionalCharges;
+
+  const rawCommission = (subtotal * 10) / 100;
+
+  const discount = Math.min(data.discount, rawCommission + additionalCharges);
+  const discountFromCommission = Math.min(discount, rawCommission);
+  const discountFromAdditional = discount - discountFromCommission;
+
+  const adjustedCommission = rawCommission - discountFromCommission;
+  const adjustedAdditionalCharges = additionalCharges - discountFromAdditional;
+
+  const gst = (adjustedCommission * 18) / 100;
+
+  const grandTotal =
     data.baseFare +
     amountForKm +
     amountForMinutes +
-    data.pickCharges +
-    data.nightCharges +
-    data.cancellationFee +
-    data.insurance;
-
-  const discountedTotal = subtotal - data.discount;
-  const companyCommission = (discountedTotal * 10) / 100;
-  const gst = (companyCommission * 18) / 100;
-  const grandTotal = discountedTotal + companyCommission + gst;
+    adjustedAdditionalCharges +
+    adjustedCommission +
+    gst;
 
   const inputSections = [
     {
@@ -89,15 +114,14 @@ const CabCostCalculator = () => {
     { label: 'Remaining Minutes', value: remainingMinutes, icon: <Clock className="h-4 w-4" /> },
     { label: 'Amount for Minutes', value: `₹${amountForMinutes}`, icon: <Clock className="h-4 w-4" /> },
     { label: 'Subtotal', value: `₹${subtotal.toFixed(2)}`, icon: <Calculator className="h-4 w-4" /> },
-    { label: 'Discount', value: `₹${data.discount}`, icon: <Percent className="h-4 w-4" /> },
-    { label: 'Company Commission (10%)', value: `₹${companyCommission.toFixed(2)}`, icon: <CreditCard className="h-4 w-4" /> },
+    { label: 'Discount', value: `₹${discount}`, icon: <Percent className="h-4 w-4" /> },
+    { label: 'Company Commission (10%)', value: `₹${adjustedCommission.toFixed(2)}`, icon: <CreditCard className="h-4 w-4" /> },
     { label: 'GST (18% of Commission)', value: `₹${gst.toFixed(2)}`, icon: <Shield className="h-4 w-4" /> },
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-3xl font-bold text-primary flex items-center justify-center gap-2">
@@ -111,7 +135,6 @@ const CabCostCalculator = () => {
         </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Input Sections */}
           <div className="lg:col-span-2 space-y-6">
             {inputSections.map((section) => (
               <Card key={section.title}>
@@ -146,7 +169,6 @@ const CabCostCalculator = () => {
             ))}
           </div>
 
-          {/* Calculations Panel */}
           <div className="space-y-6">
             <Card>
               <CardHeader>
@@ -165,10 +187,9 @@ const CabCostCalculator = () => {
                     <span className="font-semibold text-right">{calc.value}</span>
                   </div>
                 ))}
-                
+
                 <Separator className="my-4" />
-                
-                {/* Grand Total */}
+
                 <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -183,7 +204,6 @@ const CabCostCalculator = () => {
               </CardContent>
             </Card>
 
-            {/* Summary Card */}
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Trip Summary</CardTitle>
